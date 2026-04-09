@@ -72,29 +72,5 @@ namespace Financiamento.Application.Services
 
             return Task.FromResult(pagamentos);
         }
-
-        public Task<ResumoClienteDto> GetResumoCliente(string cpfCnpj)
-        {
-            var contratos = _contratosRepository.GetByCliente(cpfCnpj).ToList();
-            var resumo = new ResumoClienteDto
-            {
-                ClienteCpfCnpj = cpfCnpj,
-                QuantidadeContratosAtivos = contratos.Count,
-                TotalParcelas = contratos.Sum(c => c.PrazoMeses),
-                ParcelasPagas = contratos.Sum(c => c.Pagamentos.Count(p => p.Status == (int)StatusPagamento.EmDia || 
-                                                                           p.Status == (int)StatusPagamento.Antecipado || 
-                                                                           p.Status == (int)StatusPagamento.EmAtraso)),
-                ParcelasEmAtraso = contratos.Sum(c => c.Pagamentos.Count(p => p.Status == (int)StatusPagamento.EmAtraso)),
-                ParcelasAVencer = contratos.Sum(c => Math.Max(0, c.PrazoMeses - c.Pagamentos.Count)),
-                PercentualPagasEmDia = 0,
-                SaldoDevedorConsolidado = contratos.Sum(c => c.CalcularSaldoDevedorAtual())
-            };
-
-            var totalPagas = resumo.ParcelasPagas;
-            var total = resumo.TotalParcelas;
-            resumo.PercentualPagasEmDia = total == 0 ? 0 : (decimal)totalPagas / total * 100;
-
-            return Task.FromResult(resumo);
-        }
     }
 }
