@@ -26,16 +26,16 @@ namespace Financiamento.Application.Services
             if (contrato == null) throw new ArgumentException("Contrato não encontrado", nameof(contratoId));
 
             var parcelaVencimento = contrato.DataVencimentoPrimeiraParcela.AddMonths(input.ParcelaNumero - 1);
-            var status = input.DataPagamento.Date == parcelaVencimento.Date ? StatusPagamento.EmDia
-                        : input.DataPagamento.Date > parcelaVencimento.Date ? StatusPagamento.EmAtraso
-                        : StatusPagamento.Antecipado;
+            var status = input.DataPagamento.Date == parcelaVencimento.Date ? (int)StatusPagamento.EmDia
+                        : input.DataPagamento.Date > parcelaVencimento.Date ? (int)StatusPagamento.EmAtraso
+                        : (int)StatusPagamento.Antecipado;
 
             var pagamento = new Pagamento
             {
                 ContratoId = contratoId,
                 ParcelaNumero = input.ParcelaNumero,
                 ValorPago = input.ValorPago,
-                DataPagamento = input.DataPagamento,
+                DataPagamento = input.DataPagamento.ToUniversalTime(),
                 DataVencimento = parcelaVencimento,
                 Status = status
             };
@@ -48,8 +48,8 @@ namespace Financiamento.Application.Services
                 ContratoId = created.ContratoId,
                 ParcelaNumero = created.ParcelaNumero,
                 ValorPago = created.ValorPago,
-                DataPagamento = created.DataPagamento,
-                DataVencimento = created.DataVencimento,
+                DataPagamento = input.DataPagamento.ToUniversalTime(), 
+                DataVencimento = created.DataVencimento.ToUniversalTime(), 
                 Status = created.Status
             };
 
@@ -81,8 +81,10 @@ namespace Financiamento.Application.Services
                 ClienteCpfCnpj = cpfCnpj,
                 QuantidadeContratosAtivos = contratos.Count,
                 TotalParcelas = contratos.Sum(c => c.PrazoMeses),
-                ParcelasPagas = contratos.Sum(c => c.Pagamentos.Count(p => p.Status == StatusPagamento.EmDia || p.Status == StatusPagamento.Antecipado || p.Status == StatusPagamento.EmAtraso)),
-                ParcelasEmAtraso = contratos.Sum(c => c.Pagamentos.Count(p => p.Status == StatusPagamento.EmAtraso)),
+                ParcelasPagas = contratos.Sum(c => c.Pagamentos.Count(p => p.Status == (int)StatusPagamento.EmDia || 
+                                                                           p.Status == (int)StatusPagamento.Antecipado || 
+                                                                           p.Status == (int)StatusPagamento.EmAtraso)),
+                ParcelasEmAtraso = contratos.Sum(c => c.Pagamentos.Count(p => p.Status == (int)StatusPagamento.EmAtraso)),
                 ParcelasAVencer = contratos.Sum(c => Math.Max(0, c.PrazoMeses - c.Pagamentos.Count)),
                 PercentualPagasEmDia = 0,
                 SaldoDevedorConsolidado = contratos.Sum(c => c.CalcularSaldoDevedorAtual())

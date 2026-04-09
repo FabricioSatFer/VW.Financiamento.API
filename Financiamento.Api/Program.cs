@@ -10,10 +10,10 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 var connection = builder.Configuration.GetConnectionString("DB_Volkswagen");
 
 builder.Services.AddDbContext<FinanciamentoDbContext>(opt => opt.UseNpgsql(connection, o => o.MigrationsHistoryTable("__EFMigrationsHistory", "volkswagen")));
-
 
 // Services
 builder.Services.AddScoped<IContratosServices, ContratosServices>();
