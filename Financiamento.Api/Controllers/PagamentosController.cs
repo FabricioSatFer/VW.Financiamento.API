@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Financiamento.Application.DTOs;
 using Financiamento.Application.Interfaces;
 using Financiamento.Domain.Entities;
+using Financiamento.Domain.Repositories;
 
 namespace Financiamento.Api.Controllers
 {
@@ -10,47 +11,24 @@ namespace Financiamento.Api.Controllers
     [Route("api/contratos/{contratoId}/pagamentos")]
     public class PagamentosController : ControllerBase
     {
-        private readonly Financiamento.Domain.Repositories.IContratosRepository _contratoRepo;
-        private readonly Financiamento.Domain.Repositories.IPagamentosRepository _pagamentoRepo;
+        private readonly IPagamentosServices _pagamentosService;
 
-        public PagamentosController(Financiamento.Domain.Repositories.IContratosRepository contratoRepo, Financiamento.Domain.Repositories.IPagamentosRepository pagamentoRepo)
+
+        public PagamentosController(IPagamentosServices pagamentosService)
         {
-            _contratoRepo = contratoRepo;
-            _pagamentoRepo = pagamentoRepo;
+            _pagamentosService = pagamentosService;
         }
 
         [HttpPost]
-        public IActionResult Create(Guid contratoId, [FromBody] PagamentoCreateDto dto)
-        {
-            var contrato = _contratoRepo.Get(contratoId);
-            if (contrato == null) return NotFound();
-
-            var dataVenc = contrato.DataVencimentoPrimeiraParcela.AddMonths(dto.ParcelaNumero - 1);
-            var status = dto.DataPagamento.Date > dataVenc.Date ? StatusPagamento.EmAtraso : (dto.DataPagamento.Date < dataVenc.Date ? StatusPagamento.Antecipado : StatusPagamento.EmDia);
-
-            var pagamento = new Pagamento
-            {
-                ContratoId = contratoId,
-                ParcelaNumero = dto.ParcelaNumero,
-                ValorPago = dto.ValorPago,
-                DataPagamento = dto.DataPagamento,
-                DataVencimento = dataVenc,
-                Status = status
-            };
-
-            _pagamentoRepo.Add(pagamento);
-            contrato.Pagamentos.Add(pagamento);
-            _contratoRepo.Update(contrato);
-
-            return CreatedAtAction(nameof(GetAll), new { contratoId }, pagamento);
-        }
+        public async Task<IActionResult> Create(Guid contratoId, [FromBody] PagamentoCreateDto dto)
+            => await _pagamentosService.RegistrarPagamento(contratoId, dto) != null 
+                ? CreatedAtAction(nameof(GetAll), new { contratoId }, dto) 
+                : NotFound();
 
         [HttpGet]
         public IActionResult GetAll(Guid contratoId)
-        {
-            var contrato = _contratoRepo.Get(contratoId);
-            if (contrato == null) return NotFound();
-            return Ok(_pagamentoRepo.GetByContrato(contratoId));
-        }
+            => _pagamentosService.GetByContrato(contratoId) != null 
+                ? Ok(_pagamentosService.GetByContrato(contratoId)) 
+                : NotFound();
     }
 }

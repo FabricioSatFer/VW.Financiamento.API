@@ -12,6 +12,6 @@ namespace Financiamento.Domain.Entities
         public decimal ValorPago { get; set; }
         public DateTime DataPagamento { get; set; }
         public DateTime DataVencimento { get; set; }
-        public StatusPagamento Status { get; set; }
+        public int Status { get; set; }
     }
 }

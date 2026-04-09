@@ -11,6 +11,5 @@ namespace Financiamento.Application.Interfaces
     {
         Task<PagamentoDto> RegistrarPagamento(Guid contratoId, PagamentoCreateDto input);
         Task<IEnumerable<PagamentoDto>> GetByContrato(Guid contratoId);
-        Task<ResumoClienteDto> GetResumoCliente(string cpfCnpj);
     }
 }
