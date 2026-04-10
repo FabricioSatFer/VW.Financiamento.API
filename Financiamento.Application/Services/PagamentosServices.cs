@@ -1,7 +1,7 @@
 ﻿using Financiamento.Application.DTOs;
 using Financiamento.Application.Interfaces;
 using Financiamento.Domain.Entities;
-using Financiamento.Domain.Repositories;
+using Financiamento.Infrastructure.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,9 +20,9 @@ namespace Financiamento.Application.Services
             _contratosRepository = contratosRepository;
         }
 
-        public Task<PagamentoDto> RegistrarPagamento(Guid contratoId, PagamentoCreateDto input)
+        public async Task<PagamentoDto> RegistrarPagamento(Guid contratoId, PagamentoCreateDto input)
         {
-            var contrato = _contratosRepository.Get(contratoId);
+            var contrato = await _contratosRepository.Get(contratoId);
             if (contrato == null) throw new ArgumentException("Contrato não encontrado", nameof(contratoId));
 
             var parcelaVencimento = contrato.DataVencimentoPrimeiraParcela.AddMonths(input.ParcelaNumero - 1);
@@ -53,10 +53,10 @@ namespace Financiamento.Application.Services
                 Status = created.Status
             };
 
-            return Task.FromResult(dto);
+            return dto;
         }
 
-        public Task<IEnumerable<PagamentoDto>> GetByContrato(Guid contratoId)
+        public async Task<IEnumerable<PagamentoDto>> GetByContrato(Guid contratoId)
         {
             var pagamentos = _pagamentosRepository.GetByContrato(contratoId)
                 .Select(p => new PagamentoDto
@@ -70,7 +70,7 @@ namespace Financiamento.Application.Services
                     Status = p.Status
                 });
 
-            return Task.FromResult(pagamentos);
+            return await Task.FromResult(pagamentos);
         }
     }
 }

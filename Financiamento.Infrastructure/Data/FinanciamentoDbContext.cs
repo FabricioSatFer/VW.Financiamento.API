@@ -11,6 +11,7 @@ namespace Financiamento.Infrastructure.Data
 
         public DbSet<Contrato> Contratos { get; set; }
         public DbSet<Pagamento> Pagamentos { get; set; }
+        public DbSet<Usuario> Usuarios { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -43,6 +44,19 @@ namespace Financiamento.Infrastructure.Data
                 b.Property(x => x.DataPagamento).HasColumnName("datapagamento").IsRequired();
                 b.Property(x => x.DataVencimento).HasColumnName("datavencimentoparcela").IsRequired();
                 b.Property(x => x.Status).HasColumnName("statuspagamentoid");
+            });
+
+            modelBuilder.Entity<Usuario>(b =>
+            {
+                b.ToTable("usuarios");
+                b.Property(x => x.Id).HasColumnName("id");
+                b.Property(x => x.Username).HasColumnName("username");
+                b.Property(x => x.Senha).HasColumnName("senhahash");
+                b.Property(x => x.Email).HasColumnName("email");
+                b.Property(x => x.Ativo).HasColumnName("ativo");
+                b.Property(x => x.DataCriacao).HasColumnName("datacriacao");
+                b.Property(x => x.UltimoLogin).HasColumnName("ultimologin");
+                b.Property(x => x.RoleId).HasColumnName("roleid");
             });
         }
     }

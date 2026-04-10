@@ -1,7 +1,7 @@
 ﻿using Financiamento.Application.DTOs;
 using Financiamento.Application.Interfaces;
 using Financiamento.Domain.Entities;
-using Financiamento.Domain.Repositories;
+using Financiamento.Infrastructure.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,18 +10,18 @@ using System.Threading.Tasks;
 
 namespace Financiamento.Application.Services
 {
-    public class ClientesService : IClientesService
+    public class ClientesServices : IClientesServices
     {
         private readonly IContratosRepository _contratosRepository;
 
-        public ClientesService(IContratosRepository contratosRepository)
+        public ClientesServices(IContratosRepository contratosRepository)
         {
             _contratosRepository = contratosRepository;
         }
 
-        public Task<ResumoClienteDto> GetResumoCliente(string cpfCnpj)
+        public async Task<ResumoClienteDto> GetResumoCliente(string cpfCnpj)
         {
-            var contratos = _contratosRepository.GetByCliente(cpfCnpj).ToList();
+            var contratos = (await _contratosRepository.GetByCliente(cpfCnpj)).ToList();
             var resumo = new ResumoClienteDto
             {
                 ClienteCpfCnpj = cpfCnpj,
@@ -40,7 +40,7 @@ namespace Financiamento.Application.Services
             var total = resumo.TotalParcelas;
             resumo.PercentualPagasEmDia = total == 0 ? 0 : (decimal)totalPagas / total * 100;
 
-            return Task.FromResult(resumo);
+            return await Task.FromResult(resumo);
         }
     }
 }

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Financiamento.Application.Interfaces
 {
-    public interface IClientesService
+    public interface IClientesServices
     {
         Task<ResumoClienteDto> GetResumoCliente(string cpfCnpj);
     }

@@ -1,5 +1,5 @@
+using Financiamento.Infrastructure.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Financiamento.Domain.Repositories;
 
 namespace Financiamento.Api.Controllers
 {
@@ -7,17 +7,17 @@ namespace Financiamento.Api.Controllers
     [Route("api/teste")]
     public class TesteController : ControllerBase
     {
-        private readonly Financiamento.Domain.Repositories.IContratosRepository _contratos;
+        private readonly IContratosRepository _contratos;
 
-        public TesteController(Financiamento.Domain.Repositories.IContratosRepository contratos)
+        public TesteController(IContratosRepository contratos)
         {
             _contratos = contratos;
         }
 
         [HttpGet("contratos")]
-        public IActionResult GetContratos()
+        public async Task<IActionResult> GetContratos()
         {
-            var all = _contratos.GetAll();
+            var all = await _contratos.GetAll();
             return Ok(all);
         }
     }

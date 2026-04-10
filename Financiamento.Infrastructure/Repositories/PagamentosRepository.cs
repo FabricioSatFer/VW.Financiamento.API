@@ -2,14 +2,13 @@
 using Financiamento.Infrastructure.Interfaces;
 using Financiamento.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
-using Financiamento.Domain.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Financiamento.Infrastructure.Repositories
 {
-    public class PagamentosRepository : Financiamento.Domain.Repositories.IPagamentosRepository
+    public class PagamentosRepository : IPagamentosRepository
     {
         private readonly FinanciamentoDbContext _db;
 

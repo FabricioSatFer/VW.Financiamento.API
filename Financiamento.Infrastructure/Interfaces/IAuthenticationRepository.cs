@@ -7,9 +7,8 @@ using System.Threading.Tasks;
 
 namespace Financiamento.Infrastructure.Interfaces
 {
-    public interface IPagamentosRepository
+    public interface IAuthenticationRepository
     {
-        Pagamento Add(Pagamento pagamento);
-        IEnumerable<Pagamento> GetByContrato(Guid contratoId);
+        Task<Usuario?> ObterPorUsername(string username);
     }
 }

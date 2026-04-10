@@ -9,11 +9,11 @@ namespace Financiamento.Infrastructure.Interfaces
 {
     public interface IContratosRepository
     {
-        Contrato Add(Contrato contrato);
-        Contrato Get(Guid id);
-        IEnumerable<Contrato> GetAll();
-        void Remove(Guid id);
-        IEnumerable<Contrato> GetByCliente(string cpfCnpj);
-        void Update(Contrato contrato);
+        Task<Contrato> Add(Contrato contrato);
+        Task<Contrato> Get(Guid id);
+        Task<IEnumerable<Contrato>> GetAll();
+        Task Remove(Guid id);
+        Task<IEnumerable<Contrato>> GetByCliente(string cpfCnpj);
+        Task Update(Contrato contrato);
     }
 }

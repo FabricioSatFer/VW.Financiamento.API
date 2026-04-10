@@ -1,7 +1,7 @@
 ﻿using Financiamento.Application.DTOs;
 using Financiamento.Application.Interfaces;
 using Financiamento.Domain.Entities;
-using Financiamento.Domain.Repositories;
+using Financiamento.Infrastructure.Interfaces;
 
 namespace Financiamento.Application.Services
 {
@@ -32,10 +32,11 @@ namespace Financiamento.Application.Services
             return Task.FromResult(created != null);
         }
 
-        public Task<ContratoDto?> Get(Guid id)
+        public async Task<ContratoDto?> Get(Guid id)
         {
-            var c = _contratosRepository.Get(id);
-            if (c == null) return Task.FromResult<ContratoDto?>(null);
+            var c = await _contratosRepository.Get(id);
+            if (c == null) return null;
+
             var dto = new ContratoDto
             {
                 Id = c.Id,
@@ -47,32 +48,28 @@ namespace Financiamento.Application.Services
                 TipoVeiculo = c.TipoVeiculo,
                 CondicaoVeiculo = c.CondicaoVeiculo
             };
-            return Task.FromResult<ContratoDto?>(dto);
+            return dto;
         }
 
-        public Task<IEnumerable<ContratoDto>> GetAll()
-        {
-            var all = _contratosRepository.GetAll()
-                .Select(c => new ContratoDto
-                {
-                    Id = c.Id,
-                    ClienteCpfCnpj = c.ClienteCpfCnpj,
-                    ValorTotal = c.ValorTotal,
-                    TaxaMensal = c.TaxaMensal,
-                    PrazoMeses = c.PrazoMeses,
-                    DataVencimentoPrimeiraParcela = c.DataVencimentoPrimeiraParcela,
-                    TipoVeiculo = c.TipoVeiculo,
-                    CondicaoVeiculo = c.CondicaoVeiculo
-                });
-            return Task.FromResult(all);
-        }
+        public async Task<IEnumerable<ContratoDto>> GetAll()
+            => (await _contratosRepository.GetAll()).Select(c => new ContratoDto
+            {
+                Id = c.Id,
+                ClienteCpfCnpj = c.ClienteCpfCnpj,
+                ValorTotal = c.ValorTotal,
+                TaxaMensal = c.TaxaMensal,
+                PrazoMeses = c.PrazoMeses,
+                DataVencimentoPrimeiraParcela = c.DataVencimentoPrimeiraParcela,
+                TipoVeiculo = c.TipoVeiculo,
+                CondicaoVeiculo = c.CondicaoVeiculo
+            });
 
-        public Task<bool> Delete(Guid id)
+        public async Task<bool> Delete(Guid id)
         {
-            var existing = _contratosRepository.Get(id);
-            if (existing == null) return Task.FromResult(false);
-            _contratosRepository.Remove(id);
-            return Task.FromResult(true);
+            var existing = await _contratosRepository.Get(id);
+            if (existing == null) return false;
+            await _contratosRepository.Remove(id);
+            return true;
         }
     }
 }
