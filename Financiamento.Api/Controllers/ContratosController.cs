@@ -8,6 +8,7 @@ namespace Financiamento.Api.Controllers
 {
     [ApiController]
     [Route("api/contratos")]
+    [Microsoft.AspNetCore.Authorization.Authorize]
     public class ContratosController : ControllerBase
     {
         private readonly IContratosServices _contratosService;

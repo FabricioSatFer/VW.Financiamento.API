@@ -25,7 +25,47 @@ CREATE TABLE volkswagen.CondicoesVeiculo (
 
 INSERT INTO volkswagen.CondicoesVeiculo (Descricao) VALUES ('NOVO'), ('USADO'), ('SEMINOVO');
 
--- 4. Tabela de Contratos (Entidade Principal)
+-- 4. Tabela de Usuarios
+CREATE TABLE volkswagen.Usuarios (
+    Id UUID PRIMARY KEY DEFAULT gen_random_uuid(), 
+    Username VARCHAR(50) NOT NULL UNIQUE,
+    SenhaHash TEXT NOT NULL,                        
+    Email VARCHAR(100) NOT NULL UNIQUE,
+    Ativo BOOLEAN DEFAULT TRUE,
+    DataCriacao TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UltimoLogin TIMESTAMP WITH TIME ZONE
+);
+
+CREATE TABLE volkswagen.Roles (
+    Id SERIAL PRIMARY KEY,
+    Nome VARCHAR(20) NOT NULL UNIQUE 
+);
+
+INSERT INTO volkswagen.Roles (Nome) VALUES 
+('ADMIN'), 
+('CADASTRO');
+
+ALTER TABLE volkswagen.Usuarios 
+ADD COLUMN RoleId INT REFERENCES volkswagen.Roles(Id);
+
+INSERT INTO volkswagen.Usuarios (Username, Email, SenhaHash, RoleId, Ativo) 
+VALUES 
+(
+    'admin.fabricio', 
+    'fabricio@vw.com.br', 
+    '$2a$11$HbVTXln4I5f998zSbDX4guAZYja7hUZp52LfXFt62SAOzFOQkkzRe', -- Hash BCrypt
+    (SELECT Id FROM volkswagen.Roles WHERE Nome = 'ADMIN'), 
+    TRUE
+),
+(
+    'cadastro.teste', 
+    'teste@gmail.com', 
+    '$2a$11$HbVTXln4I5f998zSbDX4guAZYja7hUZp52LfXFt62SAOzFOQkkzRe', -- Hash BCrypt
+    (SELECT Id FROM volkswagen.Roles WHERE Nome = 'CADASTRO'), 
+    TRUE
+);
+
+-- 5. Tabela de Contratos (Entidade Principal)
 CREATE TABLE volkswagen.Contratos (
     Id UUID PRIMARY KEY, -- [cite: 12]
     ClienteCpfCnpj VARCHAR(14) NOT NULL, -- [cite: 13]
@@ -40,7 +80,7 @@ CREATE TABLE volkswagen.Contratos (
     CONSTRAINT fk_condicao_veiculo FOREIGN KEY (CondicaoVeiculoId) REFERENCES volkswagen.CondicoesVeiculo(Id)
 );
 
--- 5. Tabela de Pagamentos (Registro de Transações)
+-- 6. Tabela de Pagamentos (Registro de Transações)
 CREATE TABLE volkswagen.Pagamentos (
     Id UUID PRIMARY KEY,
     ContratoId UUID NOT NULL,

@@ -3,12 +3,12 @@ using Microsoft.AspNetCore.Mvc;
 using Financiamento.Application.DTOs;
 using Financiamento.Application.Interfaces;
 using Financiamento.Domain.Entities;
-using Financiamento.Domain.Repositories;
 
 namespace Financiamento.Api.Controllers
 {
     [ApiController]
     [Route("api/contratos/{contratoId}/pagamentos")]
+    [Microsoft.AspNetCore.Authorization.Authorize]
     public class PagamentosController : ControllerBase
     {
         private readonly IPagamentosServices _pagamentosService;
