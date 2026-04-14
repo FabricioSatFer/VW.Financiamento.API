@@ -1,14 +1,13 @@
-﻿using System;
-using System.Linq;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Financiamento.Application.DTOs;
 using Financiamento.Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Financiamento.Api.Controllers
 {
     [ApiController]
     [Route("api/contratos")]
-    [Microsoft.AspNetCore.Authorization.Authorize]
+    [Authorize]
     public class ContratosController : ControllerBase
     {
         private readonly IContratosServices _contratosService;
@@ -19,8 +18,24 @@ namespace Financiamento.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] ContratoCreateDto dto)
-            => await _contratosService.Create(dto) ? Ok() : BadRequest();
+        public async Task<ActionResult<ContratoDto>> Create([FromBody] ContratoCreateDto dto)
+        {
+            var result = await _contratosService.Create(dto);
+            if (!result.Success)
+            {
+                return BadRequest(new ProblemDetails
+                {
+                    Detail = string.Join(";", result.Errors)
+                });
+            }
+
+            if (result.Value is null)
+            {
+                return Problem(detail: "Contrato criado mas não foi possível retornar representação.", statusCode: 500);
+            }
+
+            return CreatedAtAction(nameof(Get), new { id = result.Value.Id }, result.Value);
+        }
 
         [HttpGet]
         public async Task<IActionResult> List()

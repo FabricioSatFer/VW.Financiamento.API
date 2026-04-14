@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Financiamento.Application.DTOs
 {
-    public class LoginRequest
+    public class LoginRequestDto
     {
         public string? Username { get; set; }
         public string? Senha { get; set; }

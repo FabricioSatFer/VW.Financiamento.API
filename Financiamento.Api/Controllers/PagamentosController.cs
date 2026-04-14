@@ -1,14 +1,13 @@
-﻿using System;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Financiamento.Application.DTOs;
 using Financiamento.Application.Interfaces;
-using Financiamento.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Financiamento.Api.Controllers
 {
     [ApiController]
     [Route("api/contratos/{contratoId}/pagamentos")]
-    [Microsoft.AspNetCore.Authorization.Authorize]
+    [Authorize]
     public class PagamentosController : ControllerBase
     {
         private readonly IPagamentosServices _pagamentosService;

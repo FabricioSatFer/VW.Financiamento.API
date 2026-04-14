@@ -1,11 +1,12 @@
 ﻿using Financiamento.Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Financiamento.Api.Controllers
 {
     [ApiController]
     [Route("api/clientes/{cpfCnpj}/resumo")]
-    [Microsoft.AspNetCore.Authorization.Authorize]
+    [Authorize]
     public class ClientesController : ControllerBase
     {
         private readonly IClientesServices _clientesService;

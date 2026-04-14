@@ -9,7 +9,7 @@ namespace Financiamento.Application.Interfaces
 {
     public interface IContratosServices
     {
-        Task<bool> Create(ContratoCreateDto input);
+        Task<OperationResult<ContratoDto>> Create(ContratoCreateDto input);
         Task<ContratoDto?> Get(Guid id);
         Task<IEnumerable<ContratoDto>> GetAll();
         Task<bool> Delete(Guid id);
