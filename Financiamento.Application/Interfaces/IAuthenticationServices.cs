@@ -4,6 +4,6 @@ namespace Financiamento.Application.Interfaces
 {
     public interface IAuthenticationServices
     {
-        Task<LoginResponseDto> Autenticar(LoginRequest req);
+        Task<LoginResponseDto> Autenticar(LoginRequestDto req);
     }
 }

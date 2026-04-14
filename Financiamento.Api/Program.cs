@@ -117,7 +117,10 @@ if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(options => {
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "Financiamento API V1");
+        options.RoutePrefix = string.Empty;   
+    });
 }
 
 app.UseRouting();
@@ -126,7 +129,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
-// apply pending migrations automatically in container/dev
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<FinanciamentoDbContext>();

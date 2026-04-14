@@ -25,7 +25,7 @@ namespace Financiamento.Application.Services
             _authenticationRepository = authenticationRepository;
         }
 
-        public async Task<LoginResponseDto> Autenticar(LoginRequest req)
+        public async Task<LoginResponseDto> Autenticar(LoginRequestDto req)
         {
             if (req is null || string.IsNullOrWhiteSpace(req.Username) || string.IsNullOrWhiteSpace(req.Senha))
                 return null;
