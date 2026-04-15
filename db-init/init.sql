@@ -80,6 +80,25 @@ CREATE TABLE volkswagen.Contratos (
     CONSTRAINT fk_condicao_veiculo FOREIGN KEY (CondicaoVeiculoId) REFERENCES volkswagen.CondicoesVeiculo(Id)
 );
 
+INSERT INTO volkswagen.Contratos 
+(Id, ClienteCpfCnpj, ValorTotal, TaxaMensal, PrazoMeses, DataVencimentoPrimeiraParcela, TipoVeiculoId, CondicaoVeiculoId)
+VALUES 
+(gen_random_uuid(), '12345678901', 50000.00, 1.5, 48, '2026-05-10', 1, 1), -- Carro Novo
+(gen_random_uuid(), '98765432100', 15000.00, 2.1, 24, '2026-05-15', 2, 2), -- Moto Usada
+(gen_random_uuid(), '11223344000199', 450000.00, 0.9, 72, '2026-06-01', 3, 1), -- Caminhão Novo (PJ)
+(gen_random_uuid(), '55566677788', 35000.00, 1.8, 36, '2026-05-20', 1, 3), -- Carro Seminovos
+(gen_random_uuid(), '44433322211', 12000.00, 2.5, 12, '2026-05-05', 2, 2), -- Moto Usada Curto Prazo
+(gen_random_uuid(), '99988877766', 85000.00, 1.2, 60, '2026-07-10', 1, 1), -- Carro Premium Novo
+(gen_random_uuid(), '22233344455', 250000.00, 1.1, 48, '2026-05-25', 3, 2), -- Caminhão Usado
+(gen_random_uuid(), '77788899900', 42000.00, 1.6, 48, '2026-06-15', 1, 2), -- Carro Usado
+(gen_random_uuid(), '66655544433', 18000.00, 2.0, 24, '2026-05-12', 2, 1), -- Moto Nova
+(gen_random_uuid(), '33322211100', 500000.00, 0.8, 96, '2026-08-01', 3, 3), -- Caminhão Seminovos Longo Prazo
+(gen_random_uuid(), '12121212000100', 65000.00, 1.4, 36, '2026-05-30', 1, 1), -- Carro Empresa
+(gen_random_uuid(), '85296374100', 22000.00, 1.9, 18, '2026-05-18', 2, 3), -- Moto Seminovos
+(gen_random_uuid(), '14725836900', 120000.00, 1.3, 48, '2026-06-20', 1, 2), -- SUV Usado
+(gen_random_uuid(), '36925814700', 310000.00, 1.0, 60, '2026-07-05', 3, 1), -- Caminhão Frota
+(gen_random_uuid(), '15935745600', 28000.00, 2.2, 36, '2026-05-22', 2, 2); -- Moto Popular Usada
+
 -- 6. Tabela de Pagamentos (Registro de Transações)
 CREATE TABLE volkswagen.Pagamentos (
     Id UUID PRIMARY KEY,

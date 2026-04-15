@@ -12,6 +12,7 @@ namespace Financiamento.Infrastructure.Interfaces
         Task<Contrato> Add(Contrato contrato);
         Task<Contrato> Get(Guid id);
         Task<IEnumerable<Contrato>> GetAll();
+        Task<(IEnumerable<Contrato> Items, int TotalCount)> GetAllPaginado(int offset, int pageSize);
         Task Remove(Guid id);
         Task<IEnumerable<Contrato>> GetByCliente(string cpfCnpj);
         Task Update(Contrato contrato);

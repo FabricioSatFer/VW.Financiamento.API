@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Financiamento.Application.Services
@@ -21,6 +22,7 @@ namespace Financiamento.Application.Services
 
         public async Task<ResumoClienteDto> GetResumoCliente(string cpfCnpj)
         {
+            var cpfcnpj = Regex.Replace(cpfCnpj, @"[./-]", "").ToUpper();
             var contratos = (await _contratosRepository.GetByCliente(cpfCnpj)).ToList();
             var resumo = new ResumoClienteDto
             {

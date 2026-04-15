@@ -41,6 +41,13 @@ namespace Financiamento.Api.Controllers
         public async Task<IActionResult> List()
             => Ok(await _contratosService.GetAll());
 
+        [HttpGet("paginado")]
+        public async Task<ActionResult<PagedResult<ContratoDto>>> ListPaginado([FromQuery] PaginationParameters parameters)
+        {
+            var result = await _contratosService.GetAllPaginado(parameters);
+            return Ok(result);
+        }
+
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(Guid id)
             => await _contratosService.Get(id) is ContratoDto c ? Ok(c) : NotFound();

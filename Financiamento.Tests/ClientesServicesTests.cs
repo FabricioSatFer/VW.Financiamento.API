@@ -45,6 +45,33 @@ namespace Financiamento.Tests
         }
 
         [Fact]
+        public async Task GetResumoCliente_RetornaResumoCorretoComContratosSemPagamentos()
+        {
+            var cpfCnpj = "217.473.860-06";
+            var mockRepo = new Mock<IContratosRepository>();
+            mockRepo.Setup(r => r.GetByCliente(cpfCnpj)).ReturnsAsync(new List<Contrato>
+            {
+                new Contrato
+                {
+                    Id = Guid.NewGuid(),
+                    ClienteCpfCnpj = cpfCnpj,
+                    PrazoMeses = 12,
+                    Pagamentos = new List<Pagamento>()
+                }
+            });
+            var service = new ClientesServices(mockRepo.Object);
+            var result = await service.GetResumoCliente(cpfCnpj);
+            Assert.NotNull(result);
+            Assert.Equal(cpfCnpj, result.ClienteCpfCnpj);
+            Assert.Equal(1, result.QuantidadeContratosAtivos);
+            Assert.Equal(12, result.TotalParcelas);
+            Assert.Equal(0, result.ParcelasPagas);
+            Assert.Equal(0, result.ParcelasEmAtraso);
+            Assert.Equal(12, result.ParcelasAVencer);
+            Assert.Equal(0m, result.PercentualPagasEmDia);
+        }
+
+        [Fact]
         public async Task GetResumoCliente_RetornaResumoVazioQuandoSemContratos()
         {
             var cpfCnpj = "836.434.820-51";

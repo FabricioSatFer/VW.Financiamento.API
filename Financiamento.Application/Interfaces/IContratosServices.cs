@@ -12,6 +12,7 @@ namespace Financiamento.Application.Interfaces
         Task<OperationResult<ContratoDto>> Create(ContratoCreateDto input);
         Task<ContratoDto?> Get(Guid id);
         Task<IEnumerable<ContratoDto>> GetAll();
+        Task<PagedResult<ContratoDto>> GetAllPaginado(PaginationParameters parameters);
         Task<bool> Delete(Guid id);
     }
 }
