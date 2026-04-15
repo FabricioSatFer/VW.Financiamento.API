@@ -24,8 +24,23 @@ namespace Financiamento.Infrastructure.Repositories
 
         public async Task<Contrato> Get(Guid id) 
             => await _db.Contratos.Include(c => c.Pagamentos).FirstOrDefaultAsync(c => c.Id == id);
+
         public async Task<IEnumerable<Contrato>> GetAll() 
             => await _db.Contratos.Include(c => c.Pagamentos).AsNoTracking().ToListAsync();
+
+        public async Task<(IEnumerable<Contrato> Items, int TotalCount)> GetAllPaginado(int offset, int pageSize)
+        {
+            var totalCount = await _db.Contratos.CountAsync();
+            var items = await _db.Contratos
+                .Include(c => c.Pagamentos)
+                .AsNoTracking()
+                .OrderByDescending(c => c.DataVencimentoPrimeiraParcela)
+                .Skip(offset)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (items, totalCount);
+        }
 
         public async Task Remove(Guid id)
         {

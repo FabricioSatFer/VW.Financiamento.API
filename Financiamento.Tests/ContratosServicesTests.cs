@@ -131,7 +131,144 @@ namespace Financiamento.Tests
 
             var result = await service.Create(dto);
 
-            Assert.False(result.Success);   
+            Assert.False(result.Success);
         }
+
+        [Fact]
+        public async Task Create_RetornaFalseQuandoCpfInvalido()
+        {
+            var mockRepo = new Mock<IContratosRepository>();
+            var service = new ContratosServices(mockRepo.Object);
+            var dto = new ContratoCreateDto
+            {
+                ClienteCpfCnpj = "123.456.789-00",
+                TaxaMensal = 1,
+                PrazoMeses = 12,
+                DataVencimentoPrimeiraParcela = DateTime.UtcNow,
+                TipoVeiculo = TipoVeiculo.Automovel,
+                CondicaoVeiculo = CondicaoVeiculo.Novo
+            };
+            var result = await service.Create(dto);
+            Assert.False(result.Success);
+            Assert.Contains("CPF inválido.", result.Errors);
+        }
+
+        [Fact]
+        public async Task Create_RetornaFalseQuandoCnpjInvalido()
+        {
+            var mockRepo = new Mock<IContratosRepository>();
+            var service = new ContratosServices(mockRepo.Object);
+            var dto = new ContratoCreateDto
+            {
+                ClienteCpfCnpj = "12.345.678/0001-00",
+                TaxaMensal = 1,
+                PrazoMeses = 12,
+                DataVencimentoPrimeiraParcela = DateTime.UtcNow,
+                TipoVeiculo = TipoVeiculo.Automovel,
+                CondicaoVeiculo = CondicaoVeiculo.Novo
+            };
+            var result = await service.Create(dto);
+            Assert.False(result.Success);
+            Assert.Contains("CNPJ inválido.", result.Errors);
+        }
+
+        [Fact]
+        public async Task Create_RetornaFalseQuandoCpfCnpjVazio()
+        {
+            var mockRepo = new Mock<IContratosRepository>();
+            var service = new ContratosServices(mockRepo.Object);
+            var dto = new ContratoCreateDto
+            {
+                ClienteCpfCnpj = "",
+                TaxaMensal = 1,
+                PrazoMeses = 12,
+                DataVencimentoPrimeiraParcela = DateTime.UtcNow,
+                TipoVeiculo = TipoVeiculo.Automovel,
+                CondicaoVeiculo = CondicaoVeiculo.Novo
+            };
+            var result = await service.Create(dto);
+            Assert.False(result.Success);
+            Assert.Contains("CPF/CNPJ inválido.", result.Errors);
+        }
+
+        [Fact]
+        public async Task Create_RetornaFalseQuandoExcecao()
+        {
+            var mockRepo = new Mock<IContratosRepository>();
+            mockRepo.Setup(r => r.Add(It.IsAny<Contrato>())).ThrowsAsync(new Exception("Erro de teste"));
+            var service = new ContratosServices(mockRepo.Object);
+            var dto = new ContratoCreateDto
+            {
+                ClienteCpfCnpj = "529.377.080-21",
+                TaxaMensal = 1,
+                PrazoMeses = 12,
+                DataVencimentoPrimeiraParcela = DateTime.UtcNow,
+                TipoVeiculo = TipoVeiculo.Automovel,
+                CondicaoVeiculo = CondicaoVeiculo.Novo
+            };
+            var result = await service.Create(dto);
+            Assert.False(result.Success);
+            Assert.Contains("Erro ao incluir contrato: Erro de teste", result.Errors);
+        }
+
+        [Fact]
+        public async Task GetAllPaginado_RetornaPaginaCorreta()
+        {
+            var mockRepo = new Mock<IContratosRepository>();
+            var contratos = new List<Contrato>
+            {
+                new Contrato { Id = Guid.NewGuid(), ClienteCpfCnpj = "52937708021", ValorTotal = 1000 },
+                new Contrato { Id = Guid.NewGuid(), ClienteCpfCnpj = "83643482051", ValorTotal = 2000 },
+                new Contrato { Id = Guid.NewGuid(), ClienteCpfCnpj = "99706287043", ValorTotal = 3000 }
+            };
+
+            mockRepo.Setup(r => r.GetAllPaginado(It.IsAny<int>(), It.IsAny<int>()))
+                .ReturnsAsync((int offset, int pageSize) => 
+                {
+                    var items = contratos.Skip(offset).Take(pageSize);
+                    return (items, contratos.Count);
+                });
+
+            var service = new ContratosServices(mockRepo.Object);
+            var parameters = new PaginationParameters { Pagina = 1, TamanhoPagina = 2 };
+
+            var result = await service.GetAllPaginado(parameters);
+
+            Assert.Equal(2, result.Items.Count());
+            Assert.Equal(3, result.TotalRegistros);
+            Assert.Equal(2, result.TotalPaginas);
+            Assert.False(result.TemAnterior);
+            Assert.True(result.TemProximo);
+        }
+
+        [Fact]
+        public async Task GetAllPaginado_RetornaSegundaPagina()
+        {
+            var mockRepo = new Mock<IContratosRepository>();
+            var contratos = new List<Contrato>
+            {
+                new Contrato { Id = Guid.NewGuid(), ClienteCpfCnpj = "52937708021", ValorTotal = 1000 },
+                new Contrato { Id = Guid.NewGuid(), ClienteCpfCnpj = "83643482051", ValorTotal = 2000 },
+                new Contrato { Id = Guid.NewGuid(), ClienteCpfCnpj = "99706287043", ValorTotal = 3000 }
+            };
+
+            mockRepo.Setup(r => r.GetAllPaginado(It.IsAny<int>(), It.IsAny<int>()))
+                .ReturnsAsync((int offset, int pageSize) =>
+                {
+                    var items = contratos.Skip(offset).Take(pageSize);
+                    return (items, contratos.Count);
+                });
+
+            var service = new ContratosServices(mockRepo.Object);
+            var parameters = new PaginationParameters { Pagina = 2, TamanhoPagina = 2 };
+
+            var result = await service.GetAllPaginado(parameters);
+
+            Assert.Single(result.Items);
+            Assert.Equal(3, result.TotalRegistros);
+            Assert.True(result.TemAnterior);
+            Assert.False(result.TemProximo);
+        }
+
     }
 }

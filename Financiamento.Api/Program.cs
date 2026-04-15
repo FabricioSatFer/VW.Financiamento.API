@@ -10,10 +10,33 @@ using Microsoft.EntityFrameworkCore;
 using Financiamento.Application.Services;
 using Financiamento.Infrastructure.Repositories;
 using Financiamento.Infrastructure.Interfaces;
+using Financiamento.Api.Middlewares;
+using Serilog;
+using Serilog.Events;
+
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+    .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
+    .Enrich.FromLogContext()
+    .Enrich.WithMachineName()
+    .Enrich.WithThreadId()
+    .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}")
+    .WriteTo.File(
+        path: "logs/financiamento-.log",
+        rollingInterval: RollingInterval.Day,
+        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}",
+        retainedFileCountLimit: 30)
+    .CreateLogger();
+
+try
+{
+    Log.Information("Starting Financiamento API");
 
 var builder = WebApplication.CreateBuilder(args);
 
-// configure listening URLs from environment (docker-compose will set ASPNETCORE_HTTP_PORTS or ASPNETCORE_URLS)
+builder.Host.UseSerilog();
+
 var httpPorts = builder.Configuration["ASPNETCORE_HTTP_PORTS"] ?? Environment.GetEnvironmentVariable("ASPNETCORE_HTTP_PORTS");
 var aspnetUrls = builder.Configuration["ASPNETCORE_URLS"] ?? Environment.GetEnvironmentVariable("ASPNETCORE_URLS");
 if (!string.IsNullOrWhiteSpace(aspnetUrls))
@@ -32,7 +55,6 @@ else if (!string.IsNullOrWhiteSpace(httpPorts))
 }
 else
 {
-    // default to listen on all interfaces port 80 inside container
     builder.WebHost.UseUrls("http://0.0.0.0:80");
 }
 
@@ -113,6 +135,10 @@ builder.Services.AddScoped<IPagamentosRepository, PagamentosRepository>();
 
 var app = builder.Build();
 
+app.UseMiddleware<CorrelationIdMiddleware>();
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.UseMiddleware<RequestLoggingMiddleware>();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
@@ -136,3 +162,12 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Application terminated unexpectedly");
+}
+finally
+{
+    Log.CloseAndFlush();
+}
