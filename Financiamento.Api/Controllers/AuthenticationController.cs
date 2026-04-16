@@ -18,6 +18,12 @@ namespace Financiamento.Api.Controllers
 
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequestDto req)
-            => await _authenticationServices.Autenticar(req) is LoginResponseDto token ? Ok(token) : Unauthorized();
+        {
+            var result = await _authenticationServices.Autenticar(req);
+            if (result == null)
+                return Unauthorized(new { message = "Usuário ou senha incorretos." });
+
+            return Ok(result);
+        }
     }
 }
