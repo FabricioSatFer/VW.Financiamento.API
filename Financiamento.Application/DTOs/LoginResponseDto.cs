@@ -11,5 +11,7 @@ namespace Financiamento.Application.DTOs
         public string? Token { get; set; }
         public string? TokenType { get; set; }
         public int? ExpiresIn { get; set; }
+        public string? ErrorMessage { get; set; }
+        public bool Success => string.IsNullOrEmpty(ErrorMessage);
     }
 }
