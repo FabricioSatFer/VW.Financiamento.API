@@ -41,8 +41,14 @@ namespace Financiamento.Infrastructure.Data
                 b.Property(x => x.ContratoId).HasColumnName("contratoid");
                 b.Property(x => x.ParcelaNumero).HasColumnName("numeroparcela");
                 b.Property(x => x.ValorPago).HasColumnName("valorpago").HasColumnType("numeric(18,2)");
+                b.Property(x => x.ValorOriginalParcela).HasColumnName("valororiginalparcela").HasColumnType("numeric(18,2)");
+                b.Property(x => x.ValorDesconto).HasColumnName("valordesconto").HasColumnType("numeric(18,2)");
+                b.Property(x => x.ValorJuros).HasColumnName("valorjuros").HasColumnType("numeric(18,2)");
+                b.Property(x => x.ValorMulta).HasColumnName("valormulta").HasColumnType("numeric(18,2)");
                 b.Property(x => x.DataPagamento).HasColumnName("datapagamento").IsRequired();
                 b.Property(x => x.DataVencimento).HasColumnName("datavencimentoparcela").IsRequired();
+                b.Property(x => x.DiasAntecipacao).HasColumnName("diasantecipacao");
+                b.Property(x => x.DiasAtraso).HasColumnName("diasatraso");
                 b.Property(x => x.Status).HasColumnName("statuspagamentoid");
             });
 

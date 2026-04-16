@@ -3,6 +3,7 @@ using Financiamento.Application.Helpers;
 using Financiamento.Application.Interfaces;
 using Financiamento.Domain.Entities;
 using Financiamento.Infrastructure.Interfaces;
+using Microsoft.AspNetCore.Http;
 using System.Text.RegularExpressions;
 
 namespace Financiamento.Application.Services
@@ -18,67 +19,47 @@ namespace Financiamento.Application.Services
 
         public async Task<OperationResult<ContratoDto>> Create(ContratoCreateDto input)
         {
-            try
+            var cpfcnpj = Regex.Replace(input.ClienteCpfCnpj, @"[./-]", "").ToUpper();
+
+            var contrato = new Contrato
             {
-                var cpfcnpj = Regex.Replace(input.ClienteCpfCnpj, @"[./-]", "").ToUpper();
-                var erroCpfCnpj = await ValidarCpfCnpj(cpfcnpj);
-                if (!string.IsNullOrEmpty(erroCpfCnpj))
-                {
-                    return new OperationResult<ContratoDto>
-                    {
-                        Success = false,
-                        Errors = new[] { erroCpfCnpj }
-                    };
-                }
+                Id = Guid.NewGuid(),
+                ClienteCpfCnpj = cpfcnpj,
+                ValorTotal = input.ValorTotal,
+                TaxaMensal = input.TaxaMensal,
+                PrazoMeses = input.PrazoMeses,
+                DataVencimentoPrimeiraParcela = input.DataVencimentoPrimeiraParcela,
+                TipoVeiculo = input.TipoVeiculo,
+                CondicaoVeiculo = input.CondicaoVeiculo
+            };
 
-                var contrato = new Contrato
+            var created = await _contratosRepository.Add(contrato);
+            if (created != null)
+            {
+                var dto = new ContratoDto
                 {
-                    Id = Guid.NewGuid(),
-                    ClienteCpfCnpj = cpfcnpj,
-                    ValorTotal = input.ValorTotal,
-                    TaxaMensal = input.TaxaMensal,
-                    PrazoMeses = input.PrazoMeses,
-                    DataVencimentoPrimeiraParcela = input.DataVencimentoPrimeiraParcela,
-                    TipoVeiculo = input.TipoVeiculo,
-                    CondicaoVeiculo = input.CondicaoVeiculo
+                    Id = created.Id,
+                    ClienteCpfCnpj = created.ClienteCpfCnpj,
+                    ValorTotal = created.ValorTotal,
+                    TaxaMensal = created.TaxaMensal,
+                    PrazoMeses = created.PrazoMeses,
+                    DataVencimentoPrimeiraParcela = created.DataVencimentoPrimeiraParcela,
+                    TipoVeiculo = created.TipoVeiculo,
+                    CondicaoVeiculo = created.CondicaoVeiculo
                 };
-
-                var created = await _contratosRepository.Add(contrato);
-                if (created != null)
-                {
-                    var dto = new ContratoDto
-                    {
-                        Id = created.Id,
-                        ClienteCpfCnpj = created.ClienteCpfCnpj,
-                        ValorTotal = created.ValorTotal,
-                        TaxaMensal = created.TaxaMensal,
-                        PrazoMeses = created.PrazoMeses,
-                        DataVencimentoPrimeiraParcela = created.DataVencimentoPrimeiraParcela,
-                        TipoVeiculo = created.TipoVeiculo,
-                        CondicaoVeiculo = created.CondicaoVeiculo
-                    };
-
-                    return new OperationResult<ContratoDto>
-                    {
-                        Success = true,
-                        Value = dto
-                    };
-                }
 
                 return new OperationResult<ContratoDto>
                 {
-                    Success = false,
-                    Errors = new[] { "Erro ao incluir contrato." }
+                    Success = true,
+                    Value = dto
                 };
             }
-            catch (Exception ex)
+
+            return new OperationResult<ContratoDto>
             {
-                return new OperationResult<ContratoDto>
-                {
-                    Success = false,
-                    Errors = new[] { $"Erro ao incluir contrato: {ex.Message}" }
-                };
-            }
+                Success = false,
+                Errors = new List<string> { "Não foi possível criar o contrato." }
+            };
         }
 
         public async Task<ContratoDto?> Get(Guid id)
@@ -150,29 +131,6 @@ namespace Financiamento.Application.Services
             if (existing == null) return false;
             await _contratosRepository.Remove(id);
             return true;
-        }
-
-        private async Task<string> ValidarCpfCnpj(string cpfCnpj)
-        {
-            if (string.IsNullOrWhiteSpace(cpfCnpj))
-                return "CPF/CNPJ inválido.";
-
-            if (cpfCnpj.Length == 11)
-            {
-                if (!CPFHelper.Validar(cpfCnpj))
-                    return "CPF inválido.";
-            }
-            else if (cpfCnpj.Length == 14)
-            {
-                if (!CNPJHelper.Validar(cpfCnpj))
-                    return "CNPJ inválido.";
-            }
-            else
-            {
-                return "CPF/CNPJ inválido.";
-            }
-
-            return string.Empty;
         }
     }
 }
