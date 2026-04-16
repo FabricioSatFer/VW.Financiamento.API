@@ -1,4 +1,5 @@
 ﻿using Financiamento.Application.DTOs;
+using Financiamento.Application.Helpers;
 using Financiamento.Application.Interfaces;
 using Financiamento.Domain.Entities;
 using Financiamento.Infrastructure.Interfaces;
@@ -20,13 +21,26 @@ namespace Financiamento.Application.Services
             _contratosRepository = contratosRepository;
         }
 
-        public async Task<ResumoClienteDto> GetResumoCliente(string cpfCnpj)
+        public async Task<OperationResult<ResumoClienteDto>> GetResumoCliente(string cpfCnpj)
         {
-            var cpfcnpj = Regex.Replace(cpfCnpj, @"[./-]", "").ToUpper();
-            var contratos = (await _contratosRepository.GetByCliente(cpfCnpj)).ToList();
+            var cpfCnpjLimpo = Regex.Replace(cpfCnpj, @"[./-]", "").ToUpper();
+            var contratos = (await _contratosRepository.GetByCliente(cpfCnpjLimpo)).ToList();
+
+            if (contratos == null || !contratos.Any())
+            {
+                return new OperationResult<ResumoClienteDto>
+                {
+                    Success = false,
+                    Errors = new List<string> { $"Nenhum contrato encontrado para o cliente {cpfCnpj}" },
+                    Code = "CLIENT_NOT_FOUND"
+                };
+            }
+
             var resumo = new ResumoClienteDto
             {
-                ClienteCpfCnpj = cpfCnpj,
+                ClienteCpfCnpj = cpfCnpjLimpo.Length == 11 
+                                        ? CPFHelper.FormatarMascaraCPF(cpfCnpjLimpo) 
+                                        : CNPJHelper.FormatarMascaraCNPJ(cpfCnpjLimpo),
                 QuantidadeContratosAtivos = contratos.Count,
                 TotalParcelas = contratos.Sum(c => c.PrazoMeses),
                 ParcelasPagas = contratos.Sum(c => c.Pagamentos.Count(p => p.Status == (int)StatusPagamento.EmDia ||
@@ -42,7 +56,11 @@ namespace Financiamento.Application.Services
             var total = resumo.TotalParcelas;
             resumo.PercentualPagasEmDia = total == 0 ? 0 : (decimal)totalPagas / total * 100;
 
-            return await Task.FromResult(resumo);
+            return new OperationResult<ResumoClienteDto>
+            {
+                Success = true,
+                Value = resumo
+            };
         }
     }
 }

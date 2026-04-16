@@ -13,6 +13,8 @@ using Financiamento.Infrastructure.Interfaces;
 using Financiamento.Api.Middlewares;
 using Serilog;
 using Serilog.Events;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
@@ -59,6 +61,14 @@ else
 }
 
 builder.Services.AddControllers();
+
+builder.Services.AddHttpContextAccessor();
+
+// FluentValidation
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddFluentValidationClientsideAdapters();
+builder.Services.AddValidatorsFromAssemblyContaining<Financiamento.Application.Validators.ContratoCreateValidator>();
+
 builder.Services.AddEndpointsApiExplorer();
 
 // configure JWT

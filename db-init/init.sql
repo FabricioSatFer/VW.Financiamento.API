@@ -106,7 +106,13 @@ CREATE TABLE volkswagen.Pagamentos (
     NumeroParcela INT NOT NULL,
     ValorPago DECIMAL(18,2) NOT NULL,
     DataPagamento TIMESTAMP NOT NULL,
+	ValorOriginalParcela DECIMAL(18,2) NOT NULL,
+	ValorDesconto DECIMAL(18,2) DEFAULT 0.00,
+    ValorJuros DECIMAL(18,2) DEFAULT 0.00,
+    ValorMulta DECIMAL(18,2) DEFAULT 0.00,
     DataVencimentoParcela DATE NOT NULL,
+	DiasAntecipacao INT DEFAULT 0,
+    DiasAtraso INT DEFAULT 0,
     StatusPagamentoId INT NOT NULL, -- FK para identificar se foi em dia ou atraso [cite: 25]
     CONSTRAINT fk_contrato FOREIGN KEY (ContratoId) REFERENCES volkswagen.Contratos(Id) ON DELETE CASCADE,
     CONSTRAINT fk_status_pagamento FOREIGN KEY (StatusPagamentoId) REFERENCES volkswagen.StatusPagamento(Id)

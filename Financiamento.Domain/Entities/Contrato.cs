@@ -3,8 +3,19 @@ using System.Collections.Generic;
 
 namespace Financiamento.Domain.Entities
 {
-    public enum TipoVeiculo { Automovel, Moto, Caminhao }
-    public enum CondicaoVeiculo { Novo, Usado, Seminovo }
+    public enum TipoVeiculo 
+    { 
+        Automovel = 1, 
+        Moto = 2, 
+        Caminhao = 3 
+    }
+
+    public enum CondicaoVeiculo
+    { 
+        Novo = 1, 
+        Usado = 2, 
+        Seminovo = 3 
+    }
 
     public class Contrato
     {

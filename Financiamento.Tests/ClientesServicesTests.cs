@@ -15,12 +15,12 @@ namespace Financiamento.Tests
         {
             var cpfCnpj = "217.473.860-06";
             var mockRepo = new Mock<IContratosRepository>();
-            mockRepo.Setup(r => r.GetByCliente(cpfCnpj)).ReturnsAsync(new List<Contrato>
+            mockRepo.Setup(r => r.GetByCliente("21747386006")).ReturnsAsync(new List<Contrato>
             {
                 new Contrato
                 {
                     Id = Guid.NewGuid(),
-                    ClienteCpfCnpj = cpfCnpj,
+                    ClienteCpfCnpj = "21747386006",
                     PrazoMeses = 12,
                     Pagamentos = new List<Pagamento>
                     {
@@ -34,14 +34,15 @@ namespace Financiamento.Tests
 
             var result = await service.GetResumoCliente(cpfCnpj);
 
-            Assert.NotNull(result);
-            Assert.Equal(cpfCnpj, result.ClienteCpfCnpj);
-            Assert.Equal(1, result.QuantidadeContratosAtivos);
-            Assert.Equal(12, result.TotalParcelas);
-            Assert.Equal(3, result.ParcelasPagas);
-            Assert.Equal(1, result.ParcelasEmAtraso);
-            Assert.Equal(9, result.ParcelasAVencer);
-            Assert.Equal(25m, Math.Round(result.PercentualPagasEmDia, 2));
+            Assert.True(result.Success);
+            Assert.NotNull(result.Value);
+            Assert.Equal(cpfCnpj, result.Value.ClienteCpfCnpj);
+            Assert.Equal(1, result.Value.QuantidadeContratosAtivos);
+            Assert.Equal(12, result.Value.TotalParcelas);
+            Assert.Equal(3, result.Value.ParcelasPagas);
+            Assert.Equal(1, result.Value.ParcelasEmAtraso);
+            Assert.Equal(9, result.Value.ParcelasAVencer);
+            Assert.Equal(25m, Math.Round(result.Value.PercentualPagasEmDia, 2));
         }
 
         [Fact]
@@ -49,47 +50,46 @@ namespace Financiamento.Tests
         {
             var cpfCnpj = "217.473.860-06";
             var mockRepo = new Mock<IContratosRepository>();
-            mockRepo.Setup(r => r.GetByCliente(cpfCnpj)).ReturnsAsync(new List<Contrato>
+            mockRepo.Setup(r => r.GetByCliente("21747386006")).ReturnsAsync(new List<Contrato>
             {
                 new Contrato
                 {
                     Id = Guid.NewGuid(),
-                    ClienteCpfCnpj = cpfCnpj,
+                    ClienteCpfCnpj = "21747386006",
                     PrazoMeses = 12,
                     Pagamentos = new List<Pagamento>()
                 }
             });
             var service = new ClientesServices(mockRepo.Object);
+
             var result = await service.GetResumoCliente(cpfCnpj);
-            Assert.NotNull(result);
-            Assert.Equal(cpfCnpj, result.ClienteCpfCnpj);
-            Assert.Equal(1, result.QuantidadeContratosAtivos);
-            Assert.Equal(12, result.TotalParcelas);
-            Assert.Equal(0, result.ParcelasPagas);
-            Assert.Equal(0, result.ParcelasEmAtraso);
-            Assert.Equal(12, result.ParcelasAVencer);
-            Assert.Equal(0m, result.PercentualPagasEmDia);
+
+            Assert.True(result.Success);
+            Assert.NotNull(result.Value);
+            Assert.Equal(cpfCnpj, result.Value.ClienteCpfCnpj);
+            Assert.Equal(1, result.Value.QuantidadeContratosAtivos);
+            Assert.Equal(12, result.Value.TotalParcelas);
+            Assert.Equal(0, result.Value.ParcelasPagas);
+            Assert.Equal(0, result.Value.ParcelasEmAtraso);
+            Assert.Equal(12, result.Value.ParcelasAVencer);
+            Assert.Equal(0m, result.Value.PercentualPagasEmDia);
         }
 
         [Fact]
-        public async Task GetResumoCliente_RetornaResumoVazioQuandoSemContratos()
+        public async Task GetResumoCliente_RetornaErroQuandoSemContratos()
         {
             var cpfCnpj = "836.434.820-51";
             var mockRepo = new Mock<IContratosRepository>();
-            mockRepo.Setup(r => r.GetByCliente(cpfCnpj)).ReturnsAsync(new List<Contrato>());
+            mockRepo.Setup(r => r.GetByCliente("83643482051")).ReturnsAsync(new List<Contrato>());
             var service = new ClientesServices(mockRepo.Object);
 
             var result = await service.GetResumoCliente(cpfCnpj);
 
-            Assert.NotNull(result);
-            Assert.Equal(cpfCnpj, result.ClienteCpfCnpj);
-            Assert.Equal(0, result.QuantidadeContratosAtivos);
-            Assert.Equal(0, result.TotalParcelas);
-            Assert.Equal(0, result.ParcelasPagas);
-            Assert.Equal(0, result.ParcelasEmAtraso);
-            Assert.Equal(0, result.ParcelasAVencer);
-            Assert.Equal(0, result.PercentualPagasEmDia);
-
+            Assert.False(result.Success);
+            Assert.Null(result.Value);
+            Assert.NotEmpty(result.Errors);
+            Assert.Contains($"Nenhum contrato encontrado para o cliente {cpfCnpj}", result.Errors);
+            Assert.Equal("CLIENT_NOT_FOUND", result.Code);
         }
     }
 }

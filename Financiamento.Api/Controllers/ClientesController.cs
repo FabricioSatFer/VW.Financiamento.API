@@ -1,4 +1,5 @@
-﻿using Financiamento.Application.Interfaces;
+﻿using Financiamento.Application.DTOs;
+using Financiamento.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

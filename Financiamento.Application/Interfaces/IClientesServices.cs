@@ -9,6 +9,6 @@ namespace Financiamento.Application.Interfaces
 {
     public interface IClientesServices
     {
-        Task<ResumoClienteDto> GetResumoCliente(string cpfCnpj);
+        Task<OperationResult<ResumoClienteDto>> GetResumoCliente(string cpfCnpj);
     }
 }
